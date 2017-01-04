@@ -1,8 +1,18 @@
 <div
   class="doc-table-container"
   ng-if="hits.length"
-  ng-class="{ loading: searchSource.activeFetchCount > 0 }"
->
+  ng-class="{ loading: searchSource.activeFetchCount > 0 }">
+
+  <div class="export">
+    <small>Export:</small>&nbsp;&nbsp;
+    <a class="small" ng-click="exportAsCsv(false)">
+      Raw <i aria-hidden="true" class="fa fa-download"></i>
+    </a>&nbsp;&nbsp;&nbsp;
+    <a class="small" ng-click="exportAsCsv(true)">
+      Formatted <i aria-hidden="true" class="fa fa-download"></i>
+    </a>
+  </div>
+
   <div ng-if="!infiniteScroll">
     <div class="kuiBar docTableBar">
       <div class="kuiBarSection">
