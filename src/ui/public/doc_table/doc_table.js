@@ -1,17 +1,21 @@
 import _ from 'lodash';
 import html from 'ui/doc_table/doc_table.html';
 import { getSort } from 'ui/doc_table/lib/get_sort';
+import { saveAs } from '@elastic/filesaver';
 import 'ui/doc_table/doc_table.less';
 import 'ui/directives/truncated';
 import 'ui/directives/infinite_scroll';
 import 'ui/doc_table/components/table_header';
 import 'ui/doc_table/components/table_row';
 import { uiModules } from 'ui/modules';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 uiModules.get('kibana')
-.directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter) {
+.directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, Private) {
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
   return {
     restrict: 'E',
     template: html,
@@ -140,6 +144,77 @@ uiModules.get('kibana')
       $scope.shouldShowLimitedResultsWarning = () => (
         !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount
       );
+
+      $scope.exportAsCsv = function (formatted) {
+        var csv = {
+          separator: config.get('csv:separator'),
+          quoteValues: config.get('csv:quoteValues')
+        };
+
+        var rows = $scope.hits;
+        var columns = $scope.columns;
+        if ($scope.indexPattern.timeFieldName) {
+        	columns = [$scope.indexPattern.timeFieldName].concat(columns);
+        }
+        var nonAlphaNumRE = /[^a-zA-Z0-9]/;
+        var allDoubleQuoteRE = /"/g;
+
+        function escape(val) {
+          if (_.isObject(val)) val = val.valueOf();
+          val = String(val);
+          if (csv.quoteValues && nonAlphaNumRE.test(val)) {
+            val = '"' + val.replace(allDoubleQuoteRE, '""') + '"';
+          }
+          return val;
+        }
+
+        function formatField(value, name) {
+          var field = $scope.indexPattern.fields.byName[name];
+          if (!field) return value;
+          var defaultFormat = fieldFormats.getDefaultType(field.type);
+          var formatter = (field && field.format) ? field.format : defaultFormat;
+
+          return formatter.convert(value);
+        }
+
+        function formatRow(row) {
+          $scope.indexPattern.flattenHit(row);
+          row.$$_formatted = row.$$_formatted || _.mapValues(row.$$_flattened, formatField);
+          return row.$$_formatted;
+        }
+
+        // get column values for each row
+        var csvRows = rows.map(function (row, i) {
+          return columns.map(function (column, j) {
+            var val;
+
+            if (formatted) {
+              val = (row.$$_formatted || formatRow(row))[column];
+            } else {
+              val = (row.$$_flattened || formatRow(row))[column];
+            }
+
+            val = (val == null) ? '' : val;
+
+            return val;
+          });
+        });
+
+        // escape each cell in each row
+        csvRows = csvRows.map(function (row, i) {
+          return row.map(escape);
+        });
+
+        // add the columns to the rows
+        csvRows.unshift(columns.map(escape));
+
+        var data = csvRows.map(function (row) {
+          return row.join(csv.separator) + '\r\n';
+        }).join('');
+
+        saveAs(new Blob([data], { type: 'text/plain' }), 'export.csv');
+      };
+
     }
   };
 });
