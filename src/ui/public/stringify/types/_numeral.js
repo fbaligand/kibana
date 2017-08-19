@@ -2,11 +2,20 @@ import _ from 'lodash';
 import 'ui/field_format_editor/numeral/numeral';
 import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
 import { BoundToConfigObjProvider } from 'ui/bound_to_config_obj';
+import numeral from '@elastic/numeral';
+import numeralLanguages from '@elastic/numeral/languages';
+
+const numeralInst = numeral();
+
+numeralLanguages.forEach(function (numeralLanguage) {
+  numeral.language(numeralLanguage.id, numeralLanguage.lang);
+});
+
+
 
 export function StringifyTypesNumeralProvider(Private) {
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
   const BoundToConfigObj = Private(BoundToConfigObjProvider);
-  const numeral = require('numeral')();
 
   _.class(Numeral).inherits(FieldFormat);
   function Numeral(params) {
@@ -22,7 +31,15 @@ export function StringifyTypesNumeralProvider(Private) {
 
     if (isNaN(val)) return '';
 
-    return numeral.set(val).format(this.param('pattern'));
+    const previousLocale = numeral.language();
+    const defaultLocale = this.param('locale');
+    numeral.language(defaultLocale);
+
+    const formatted = numeralInst.set(val).format(this.param('pattern'));
+
+    numeral.language(previousLocale);
+
+    return formatted;
   };
 
 
@@ -38,6 +55,7 @@ export function StringifyTypesNumeralProvider(Private) {
 
     Class.paramDefaults = opts.paramDefaults || new BoundToConfigObj({
       pattern: '=format:' + opts.id + ':defaultPattern',
+      locale: '=format:number:defaultLocale'
     });
 
     Class.editor = {
