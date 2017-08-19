@@ -1,10 +1,34 @@
-import moment from 'moment-timezone';
+'use strict';
 
-export function getUiSettingDefaults() {
-  const weekdays = moment.weekdays().slice();
-  const [defaultWeekday] = weekdays;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+exports.getUiSettingDefaults = getUiSettingDefaults;
+
+var _momentTimezone = require('moment-timezone');
+
+var _momentTimezone2 = _interopRequireDefault(_momentTimezone);
+
+var numeralLanguages = require('@elastic/numeral/languages');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function getUiSettingDefaults() {
+  const weekdays = _momentTimezone2.default.weekdays().slice();
+
+  var _weekdays = _slicedToArray(weekdays, 1);
+
+  const defaultWeekday = _weekdays[0];
+
+  const numeralLanguageIds = numeralLanguages.map(function (numeralLanguage) {
+    return numeralLanguage.id;
+  });
 
   // wrapped in provider so that a new instance is given to each app/test
+
   return {
     'buildNum': {
       readonly: true
@@ -21,18 +45,17 @@ export function getUiSettingDefaults() {
     },
     'dateFormat': {
       value: 'MMMM Do YYYY, HH:mm:ss.SSS',
-      description: 'When displaying a pretty formatted date, use this <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">format</a>',
+      description: 'When displaying a pretty formatted date, use this <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">format</a>'
     },
     'dateFormat:tz': {
       value: 'Browser',
       description: 'Which timezone should be used.  "Browser" will use the timezone detected by your browser.',
       type: 'select',
-      options: ['Browser', ...moment.tz.names()]
+      options: ['Browser', ..._momentTimezone2.default.tz.names()]
     },
     'dateFormat:scaled': {
       type: 'json',
-      value:
-`[
+      value: `[
   ["", "HH:mm:ss.SSS"],
   ["PT1S", "HH:mm:ss"],
   ["PT1M", "HH:mm"],
@@ -40,13 +63,7 @@ export function getUiSettingDefaults() {
   ["P1DT", "YYYY-MM-DD"],
   ["P1YT", "YYYY"]
 ]`,
-      description: (
-        'Values that define the format used in situations where timebased' +
-        ' data is rendered in order, and formatted timestamps should adapt to the' +
-        ' interval between measurements. Keys are' +
-        ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' +
-        'ISO8601 intervals.</a>'
-      )
+      description: 'Values that define the format used in situations where timebased' + ' data is rendered in order, and formatted timestamps should adapt to the' + ' interval between measurements. Keys are' + ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' + 'ISO8601 intervals.</a>'
     },
     'dateFormat:dow': {
       value: defaultWeekday,
@@ -56,68 +73,56 @@ export function getUiSettingDefaults() {
     },
     'defaultIndex': {
       value: null,
-      description: 'The index to access if no index is set',
+      description: 'The index to access if no index is set'
     },
     'defaultColumns': {
       value: ['_source'],
-      description: 'Columns displayed by default in the Discovery tab',
+      description: 'Columns displayed by default in the Discovery tab'
     },
     'metaFields': {
       value: ['_source', '_id', '_type', '_index', '_score'],
-      description: 'Fields that exist outside of _source to merge into our document when displaying it',
+      description: 'Fields that exist outside of _source to merge into our document when displaying it'
     },
     'discover:sampleSize': {
       value: 500,
-      description: 'The number of rows to show in the table',
+      description: 'The number of rows to show in the table'
     },
     'discover:aggs:terms:size': {
       value: 20,
       type: 'number',
-      description: 'Determines how many terms will be visualized when clicking the "visualize" ' +
-      'button, in the field drop downs, in the discover sidebar.'
+      description: 'Determines how many terms will be visualized when clicking the "visualize" ' + 'button, in the field drop downs, in the discover sidebar.'
     },
     'doc_table:highlight': {
       value: true,
-      description: 'Highlight results in Discover and Saved Searches Dashboard.' +
-        'Highlighting makes requests slow when working on big documents.',
+      description: 'Highlight results in Discover and Saved Searches Dashboard.' + 'Highlighting makes requests slow when working on big documents.'
     },
     'doc_table:highlight:all_fields': {
       value: true,
-      description: 'Improves highlighting by using a separate "highlight_query" that uses "all_fields" mode on "query_string" queries. ' +
-        'Set to false if you are using a "default_field" in your index.',
+      description: 'Improves highlighting by using a separate "highlight_query" that uses "all_fields" mode on "query_string" queries. ' + 'Set to false if you are using a "default_field" in your index.'
     },
     'courier:maxSegmentCount': {
       value: 30,
-      description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
-        'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' +
-        'cause requests to take much longer to process'
+      description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' + 'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' + 'cause requests to take much longer to process'
     },
     'courier:ignoreFilterIfFieldNotInIndex': {
       value: false,
-      description: 'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
-        'When set to false, all filters are applied to all visualizations. ' +
-        'When set to true, filter(s) will be ignored for a visualization ' +
-        'when the visualization\'s index does not contain the filtering field.'
+      description: 'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' + 'When set to false, all filters are applied to all visualizations. ' + 'When set to true, filter(s) will be ignored for a visualization ' + 'when the visualization\'s index does not contain the filtering field.'
     },
     'fields:popularLimit': {
       value: 10,
-      description: 'The top N most popular fields to show',
+      description: 'The top N most popular fields to show'
     },
     'histogram:barTarget': {
       value: 50,
-      description: 'Attempt to generate around this many bars when using "auto" interval in date histograms',
+      description: 'Attempt to generate around this many bars when using "auto" interval in date histograms'
     },
     'histogram:maxBars': {
       value: 100,
-      description: 'Never show more than this many bars in date histograms, scale values if needed',
+      description: 'Never show more than this many bars in date histograms, scale values if needed'
     },
     'visualization:tileMap:maxPrecision': {
       value: 7,
-      description: 'The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, ' +
-      '12 is the max. ' +
-      '<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
-      'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
-      'Explanation of cell dimensions</a>',
+      description: 'The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, ' + '12 is the max. ' + '<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/' + 'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' + 'Explanation of cell dimensions</a>'
     },
     'visualization:tileMap:WMSdefaults': {
       value: JSON.stringify({
@@ -129,7 +134,7 @@ export function getUiSettingDefaults() {
           format: 'image/png',
           transparent: true,
           attribution: 'Maps provided by USGS',
-          styles: '',
+          styles: ''
         }
       }, null, 2),
       type: 'json',
@@ -153,25 +158,23 @@ export function getUiSettingDefaults() {
     'visualization:dimmingOpacity': {
       type: 'number',
       value: 0.5,
-      description: 'The opacity of the chart items that are dimmed when highlighting another element of the chart. ' +
-      'The lower this number, the more the highlighted element will stand out.' +
-      'This must be a number between 0 and 1.'
+      description: 'The opacity of the chart items that are dimmed when highlighting another element of the chart. ' + 'The lower this number, the more the highlighted element will stand out.' + 'This must be a number between 0 and 1.'
     },
     'csv:separator': {
       value: ',',
-      description: 'Separate exported values with this string',
+      description: 'Separate exported values with this string'
     },
     'csv:quoteValues': {
       value: true,
-      description: 'Should values be quoted in csv exports?',
+      description: 'Should values be quoted in csv exports?'
     },
     'history:limit': {
       value: 10,
-      description: 'In fields that have history (e.g. query inputs), show this many recent values',
+      description: 'In fields that have history (e.g. query inputs), show this many recent values'
     },
     'shortDots:enable': {
       value: false,
-      description: 'Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz',
+      description: 'Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz'
     },
     'truncate:maxHeight': {
       value: 115,
@@ -179,13 +182,11 @@ export function getUiSettingDefaults() {
     },
     'indexPattern:fieldMapping:lookBack': {
       value: 5,
-      description: 'For index patterns containing timestamps in their names, look for this many recent matching ' +
-        'patterns from which to query the field mapping'
+      description: 'For index patterns containing timestamps in their names, look for this many recent matching ' + 'patterns from which to query the field mapping'
     },
     'format:defaultTypeMap': {
       type: 'json',
-      value:
-`{
+      value: `{
   "ip": { "id": "ip", "params": {} },
   "date": { "id": "date", "params": {} },
   "number": { "id": "number", "params": {} },
@@ -193,8 +194,7 @@ export function getUiSettingDefaults() {
   "_source": { "id": "_source", "params": {} },
   "_default_": { "id": "string", "params": {} }
 }`,
-      description: 'Map of the format name to use by default for each field type. ' +
-        '"_default_" is used if the field type is not mentioned explicitly'
+      description: 'Map of the format name to use by default for each field type. ' + '"_default_" is used if the field type is not mentioned explicitly'
     },
     'format:number:defaultPattern': {
       type: 'string',
@@ -216,6 +216,12 @@ export function getUiSettingDefaults() {
       value: '($0,0.[00])',
       description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "currency" format'
     },
+    'format:number:defaultLocale': {
+      value: 'en',
+      type: 'select',
+      options: numeralLanguageIds,
+      description: '<a href="http://numeraljs.com/" target="_blank" rel="noopener">numeral language</a>'
+    },
     'savedObjects:perPage': {
       type: 'number',
       value: 5,
@@ -228,8 +234,7 @@ export function getUiSettingDefaults() {
     },
     'timepicker:timeDefaults': {
       type: 'json',
-      value:
-`{
+      value: `{
   "from": "now-15m",
   "to": "now",
   "mode": "quick"
@@ -238,8 +243,7 @@ export function getUiSettingDefaults() {
     },
     'timepicker:refreshIntervalDefaults': {
       type: 'json',
-      value:
-`{
+      value: `{
   "display": "Off",
   "pause": false,
   "value": 0
@@ -256,8 +260,7 @@ export function getUiSettingDefaults() {
     },
     'filterEditor:suggestValues': {
       value: false,
-      description: 'Set this property to `true` to have the filter editor suggest values for fields, ' +
-        'instead of just providing a text input. This may result in heavy queries to Elasticsearch.'
+      description: 'Set this property to `true` to have the filter editor suggest values for fields, ' + 'instead of just providing a text input. This may result in heavy queries to Elasticsearch.'
     },
     'notifications:banner': {
       type: 'markdown',
@@ -266,23 +269,19 @@ export function getUiSettingDefaults() {
     },
     'notifications:lifetime:banner': {
       value: 3000000,
-      description: 'The time in milliseconds which a banner notification ' +
-      'will be displayed on-screen for. Setting to Infinity will disable.'
+      description: 'The time in milliseconds which a banner notification ' + 'will be displayed on-screen for. Setting to Infinity will disable.'
     },
     'notifications:lifetime:error': {
       value: 300000,
-      description: 'The time in milliseconds which an error notification ' +
-      'will be displayed on-screen for. Setting to Infinity will disable.'
+      description: 'The time in milliseconds which an error notification ' + 'will be displayed on-screen for. Setting to Infinity will disable.'
     },
     'notifications:lifetime:warning': {
       value: 10000,
-      description: 'The time in milliseconds which a warning notification ' +
-        'will be displayed on-screen for. Setting to Infinity will disable.'
+      description: 'The time in milliseconds which a warning notification ' + 'will be displayed on-screen for. Setting to Infinity will disable.'
     },
     'notifications:lifetime:info': {
       value: 5000,
-      description: 'The time in milliseconds which an information notification ' +
-        'will be displayed on-screen for. Setting to Infinity will disable.'
+      description: 'The time in milliseconds which an information notification ' + 'will be displayed on-screen for. Setting to Infinity will disable.'
     },
     'metrics:max_buckets': {
       value: 2000,
@@ -290,27 +289,23 @@ export function getUiSettingDefaults() {
     },
     'state:storeInSessionStorage': {
       value: false,
-      description: 'The URL can sometimes grow to be too large for some browsers to ' +
-        'handle. To counter-act this we are testing if storing parts of the URL in ' +
-        'sessions storage could help. Please let us know how it goes!'
+      description: 'The URL can sometimes grow to be too large for some browsers to ' + 'handle. To counter-act this we are testing if storing parts of the URL in ' + 'sessions storage could help. Please let us know how it goes!'
     },
     'indexPattern:placeholder': {
       value: 'logstash-*',
-      description: 'The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.',
+      description: 'The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.'
     },
     'context:defaultSize': {
       value: 5,
-      description: 'The number of surrounding entries to show in the context view',
+      description: 'The number of surrounding entries to show in the context view'
     },
     'context:step': {
       value: 5,
-      description: 'The step size to increment or decrement the context size by',
+      description: 'The step size to increment or decrement the context size by'
     },
     'context:tieBreakerFields': {
       value: ['_doc'],
-      description: 'A comma-separated list of fields to use for tiebreaking between documents ' +
-        'that have the same timestamp value. From this list the first field that ' +
-        'is present and sortable in the current index pattern is used.',
-    },
+      description: 'A comma-separated list of fields to use for tiebreaking between documents ' + 'that have the same timestamp value. From this list the first field that ' + 'is present and sortable in the current index pattern is used.'
+    }
   };
 }
